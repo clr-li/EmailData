@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Send Database Data Through Email</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <h1>Set Website Status</h1>
+    <form action="/status/set" method="post">
+      <label for="site-name">Website Name: </label>
+      <input type="text" name="site-name" id="site-name" />
+      <label for="status">Status: </label>
+      <select name="status" id="status">
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>
+      <button type="submit">Set</button>
+    </form>
+
+    <h1>View Website Statuses</h1>
+    <a href="/view/all">View</a>
+
+    <h1>Send Database Data Through Email</h1>
+    <form action="/send/all" method="post">
+      <label for="email">Email: </label>
+      <input type="email" name="email" id="email" />
+      <button type="submit">Send</button>
+    </form>
+
+    <h1>Delete All Entries</h1>
+    <a href="/delete/all">Delete</a>
+  </body>
+</html>
