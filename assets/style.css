@@ -1,0 +1,62 @@
+/* General Styles */
+body {
+  margin: 10px;
+  padding: 5px;
+}
+
+.container {
+  width: 90%;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h1 {
+  color: #444;
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+input[type="email"],
+input[type="text"],
+input[type="number"],
+button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+button {
+  background-color: #227291;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3951a1;
+}
+
+/* Link Styles */
+a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #227291;
+  color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+a:hover {
+  background-color: #3951a1;
+}

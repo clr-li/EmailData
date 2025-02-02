@@ -82,12 +82,18 @@ func viewAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendAllHandler(w http.ResponseWriter, r *http.Request) {
-    email := r.FormValue("email")
-    if email == "" {
-        http.Error(w, "Email address is required", http.StatusBadRequest)
+    if err := r.ParseForm(); err != nil {
+        http.Error(w, "Invalid form data", http.StatusBadRequest)
+        return
+    }
+    emails := r.Form["email[]"]
+
+    if len(emails) == 0 {
+        http.Error(w, "No email addresses provided", http.StatusBadRequest)
         return
     }
 
+    // Fetch data from the database
     rows, err := db.Query("SELECT site_name, status FROM statuses")
     if err != nil {
         http.Error(w, "Database query failed", http.StatusInternalServerError)
@@ -105,31 +111,27 @@ func sendAllHandler(w http.ResponseWriter, r *http.Request) {
         sites = append(sites, site)
     }
 
-    // Build email content
+    // Prepare the email content
     emailBody := "<h3>Sites Status</h3><ul>"
     for _, site := range sites {
         emailBody += fmt.Sprintf("<li>%s: %s</li>", site.SiteName, site.Status)
     }
     emailBody += "</ul>"
 
-    // Send email using SendGrid API
-    from := mail.NewEmail("AutoDBData", os.Getenv("EMAIL")) // Sender name and email from .env
-    to := mail.NewEmail("Recipient", email)                 // Recipient's email from form
+    // Send emails to all recipients
+    from := mail.NewEmail("AutoDBData", os.Getenv("EMAIL"))
     subject := "Sites Status"
     plainTextContent := "Sites Status Report"
     htmlContent := emailBody
 
-    message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
     client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-    response, err := client.Send(message)
 
-    if err != nil || response.StatusCode >= 400 {
-        log.Printf("Failed to send email: %v, Response: %v", err, response.Body)
-        http.Error(w, "Email sending failed", http.StatusInternalServerError)
-        return
+    for _, email := range emails {
+		to := mail.NewEmail("Recipient", email)
+		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+        go sendEmail(message, client, w, email)
     }
-
-    fmt.Fprintf(w, "Email sent successfully to %s", email)
+    http.Redirect(w, r, "/?success=true", http.StatusSeeOther)
 }
 
 func deleteAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -145,6 +147,7 @@ func deleteAllHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	startBackend()
 
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	http.HandleFunc("/", indexHandler)
     http.HandleFunc("/status/set", setStatusHandler)
 	http.HandleFunc("/view/all", viewAllHandler)
@@ -174,4 +177,16 @@ func startBackend() {
 	if err != nil {
 		log.Fatalf("Unable to ping database: %v", err)
 	}
+}
+
+// ================== HELPER FUNCTIONS ==================
+func sendEmail(message *mail.SGMailV3, client *sendgrid.Client, w http.ResponseWriter, email string) {
+	response, err := client.Send(message)
+
+    if err != nil || response.StatusCode >= 400 {
+        log.Printf("Failed to send email: %v, Response: %v", err, response.Body)
+        http.Error(w, "Email sending failed", http.StatusInternalServerError)
+        return
+    }
+	log.Printf("Email sent successfully to %s", email)
 }
