@@ -35,15 +35,15 @@ var db *sql.DB
 
 type Site struct {
 	SiteName string `json:"site_name"`
-	Status   int    `json:"status"`
+	Status   string `json:"status"`
 }
 
+// ================== HANDLERS ==================
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join(".", "index.html")
 	http.ServeFile(w, r, filePath)
 }
 
-// ================== HANDLERS ==================
 func setStatusHandler(w http.ResponseWriter, r *http.Request) {
     siteName := r.FormValue("site-name")
     status := r.FormValue("status")
@@ -54,7 +54,7 @@ func setStatusHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.WriteHeader(http.StatusCreated)
+    http.Redirect(w, r, "/?success=true", http.StatusSeeOther)
 }
 
 func viewAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +108,7 @@ func sendAllHandler(w http.ResponseWriter, r *http.Request) {
     // Build email content
     emailBody := "<h3>Sites Status</h3><ul>"
     for _, site := range sites {
-        emailBody += fmt.Sprintf("<li>%s: %d</li>", site.SiteName, site.Status)
+        emailBody += fmt.Sprintf("<li>%s: %s</li>", site.SiteName, site.Status)
     }
     emailBody += "</ul>"
 
@@ -139,7 +139,7 @@ func deleteAllHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.WriteHeader(http.StatusOK)
+    http.Redirect(w, r, "/?success=true", http.StatusSeeOther)
 }
 
 func main() {

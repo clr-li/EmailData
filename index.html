@@ -8,14 +8,15 @@
     <link rel="stylesheet" href="/assets/style.css" />
   </head>
   <body>
+    <div id="success-message"></div>
     <h1>Set Website Status</h1>
     <form action="/status/set" method="post">
       <label for="site-name">Website Name: </label>
       <input type="text" name="site-name" id="site-name" />
       <label for="status">Status: </label>
       <select name="status" id="status">
-        <option value="1">Active</option>
-        <option value="0">Inactive</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
       </select>
       <button type="submit">Set</button>
     </form>
@@ -32,5 +33,28 @@
 
     <h1>Delete All Entries</h1>
     <a href="/delete/all">Delete</a>
+
+    <script>
+      // Check if the URL contains the success query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("success") === "true") {
+        const successMessage = document.getElementById("success-message");
+        successMessage.innerHTML = '<p style="color: green;">Success!</p>';
+        console.log(successMessage);
+        successMessage.style.display = "block";
+
+        // Hide the message after 2 seconds
+        setTimeout(() => {
+          successMessage.style.display = "none";
+
+          const newURL =
+            window.location.protocol +
+            "//" +
+            window.location.host +
+            window.location.pathname;
+          window.history.replaceState({}, document.title, newURL);
+        }, 2000);
+      }
+    </script>
   </body>
 </html>
